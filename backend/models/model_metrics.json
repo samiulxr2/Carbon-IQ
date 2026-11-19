@@ -1,0 +1,27 @@
+{
+  "carbon_stock_xgb": {
+    "model": "XGBRegressor",
+    "r2_score": 0.9997331830006578,
+    "mae_tco2e": 0.6815664066738553,
+    "features": [
+      "soil_moisture",
+      "salinity_ec",
+      "soil_temp",
+      "ndvi_satellite",
+      "ndwi_satellite",
+      "biomass_proxy"
+    ]
+  },
+  "anomaly_isolation_forest": {
+    "model": "IsolationForest",
+    "contamination": 0.03,
+    "trust_threshold": 95.0
+  },
+  "credit_forecast_gbr": {
+    "model": "GradientBoostingRegressor",
+    "r2_score": 0.9543599261168632,
+    "mae_tco2e_monthly": 1.7368490122053066
+  },
+  "trained_at": "2026-11-19T18:55:45.355127",
+  "total_training_samples": 14400
+}

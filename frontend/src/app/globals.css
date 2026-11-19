@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.font-bengali {
+  font-family: 'Noto Sans Bengali', 'Nirmala UI', 'Vrinda', 'Kalpurush', sans-serif;
+}
+
+:root {
+  --background: #060D0A;
+  --foreground: #E2E8F0;
+}
+
+body {
+  color: var(--foreground);
+  background-color: #060D0A;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Glass Card Utility */
+.glass-card {
+  background: #0D1914;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(12px);
+}
+
+.glass-card-hover {
+  transition: all 0.2s ease-in-out;
+}
+.glass-card-hover:hover {
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.12);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #060D0A;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+/* Markdown prose rendering in Copilot */
+.prose-carbon h3 {
+  color: #10B981;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.prose-carbon h4 {
+  color: #06B6D4;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+}
+.prose-carbon p {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+.prose-carbon ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.prose-carbon li {
+  margin-bottom: 0.35rem;
+}
+.prose-carbon blockquote {
+  border-left: 3px solid #10B981;
+  padding-left: 0.75rem;
+  margin: 0.75rem 0;
+  background: rgba(16, 185, 129, 0.05);
+  border-radius: 0 0.375rem 0.375rem 0;
+  font-style: italic;
+  color: #CBD5E1;
+}
+.prose-carbon table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+.prose-carbon th, .prose-carbon td {
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-carbon th {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  font-weight: 600;
+}
+.prose-carbon code {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.85em;
+}
+
+/* Leaflet Dark Mode Tiles & Map Customizations */
+.leaflet-container {
+  background-color: #060D0A !important;
+  font-family: inherit;
+  border-radius: 0.75rem;
+  z-index: 10;
+}
+.dark-leaflet-tiles .leaflet-tile-pane {
+  filter: brightness(0.68) invert(1) contrast(2.1) hue-rotate(200deg) saturate(0.35) brightness(0.65);
+}
+.leaflet-popup-content-wrapper {
+  background: #0D1914 !important;
+  color: #E2E8F0 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8) !important;
+}
+.leaflet-popup-tip {
+  background: #0D1914 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+.custom-leaflet-pin {
+  background: transparent;
+  border: none;
+}
