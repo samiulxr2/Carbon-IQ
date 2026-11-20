@@ -20,6 +20,7 @@ import {
   Activity,
   Layers
 } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 // Lazy-load Three.js Canvas to prevent Next.js SSR hydration mismatches
 const DigitalTwinCanvas = dynamic(
@@ -67,7 +68,7 @@ export default function DigitalTwinViewer() {
   useEffect(() => {
     const checkNodeStatus = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/nodes");
+        const res = await fetch(`${API_URL}/nodes`);
         const data = await res.json();
         const activeNode = data.nodes?.find((n: any) => n.id === activeNodeId);
         if (activeNode) {
@@ -105,7 +106,7 @@ export default function DigitalTwinViewer() {
     const tamperType = sceneType === "field" ? "spoof_ndvi" : "co2_spike";
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/simulate/tamper", {
+      const res = await fetch(`${API_URL}/simulate/tamper`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -137,7 +138,7 @@ export default function DigitalTwinViewer() {
   const handleRecalibrate = async () => {
     setIsTamperingAction(true);
     try {
-      await fetch("http://127.0.0.1:8000/simulate/reset", {
+      await fetch(`${API_URL}/simulate/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ node_id: activeNodeId })

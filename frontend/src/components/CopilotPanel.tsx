@@ -20,6 +20,7 @@ import {
   Info,
   AlertCircle
 } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 interface QuickChip {
   id: string;
@@ -101,7 +102,7 @@ export default function CopilotPanel() {
     setActiveIntent(null);
     setExpandedTools({});
 
-    const backendUrl = "http://127.0.0.1:8000";
+    const backendUrl = API_URL;
 
     try {
       const response = await fetch(
@@ -188,7 +189,7 @@ export default function CopilotPanel() {
         );
         setStreamedText(syncData.response || "No response received.");
       } catch (syncErr: any) {
-        setErrorMsg("Failed to connect to CarbonIQ backend at http://127.0.0.1:8000. Ensure uvicorn is running.");
+        setErrorMsg(`Failed to connect to CarbonIQ backend at ${API_URL}. Ensure uvicorn is running.`);
       } finally {
         setIsLoading(false);
       }

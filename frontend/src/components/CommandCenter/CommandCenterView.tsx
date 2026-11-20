@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import PipelineStepper from "./PipelineStepper";
 import KPICounters from "./KPICounters";
 import LiveNodeTable, { NodeData } from "./LiveNodeTable";
+import { API_URL } from "@/lib/config";
 
 export default function CommandCenterView() {
   const [nodes, setNodes] = useState<NodeData[]>([]);
@@ -14,8 +15,8 @@ export default function CommandCenterView() {
   const fetchNodes = useCallback(async () => {
     try {
       const [nodesRes, regRes] = await Promise.all([
-        fetch("http://127.0.0.1:8000/nodes"),
-        fetch("http://127.0.0.1:8000/export/registry")
+        fetch(`${API_URL}/nodes`),
+        fetch(`${API_URL}/export/registry`)
       ]);
       const nodesData = await nodesRes.json();
       const regData = await regRes.json();

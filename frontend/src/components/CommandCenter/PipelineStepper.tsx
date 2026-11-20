@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   Clock
 } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 interface PipelineStep {
   id: number;
@@ -88,7 +89,7 @@ export default function PipelineStepper({ onTickReceived }: PipelineStepperProps
           }
         }, 600);
 
-        const res = await fetch("http://127.0.0.1:8000/telemetry/live");
+        const res = await fetch(`${API_URL}/telemetry/live`);
         const data = await res.json();
 
         setLastTickTime(new Date().toLocaleTimeString());

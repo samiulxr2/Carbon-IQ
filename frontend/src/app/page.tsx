@@ -128,7 +128,7 @@ export default function HomePage() {
         <div className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-md bg-[#060D0A] border border-emerald-500/15 text-xs font-mono">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-slate-300">FastAPI ML Cluster:</span>
-          <span className="text-emerald-400 font-bold">ACTIVE (127.0.0.1:8000)</span>
+          <span className="text-emerald-400 font-bold">ACTIVE</span>
         </div>
       </div>
 

@@ -7,23 +7,16 @@ import CalibrationChart from "../Analytics/CalibrationChart";
 import ForecastChart from "../Analytics/ForecastChart";
 import { GeoNodeData } from "./BangladeshLeafletMap";
 import { Map, Layers, Radio, Sparkles } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 export default function GeoAnalyticsView() {
   const [nodes, setNodes] = useState<GeoNodeData[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string>("NODE-BD-01");
   const [loading, setLoading] = useState<boolean>(true);
-  const [backendUrl, setBackendUrl] = useState<string>("http://127.0.0.1:8000");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const host = window.location.hostname || "127.0.0.1";
-      setBackendUrl(`http://${host}:8000`);
-    }
-  }, []);
 
   const fetchNodes = useCallback(async () => {
     try {
-      const res = await fetch(`${backendUrl}/nodes`);
+      const res = await fetch(`${API_URL}/nodes`);
       if (res.ok) {
         const data = await res.json();
         const mapped: GeoNodeData[] = (data.nodes || []).map((n: any) => ({
@@ -47,14 +40,14 @@ export default function GeoAnalyticsView() {
     } finally {
       setLoading(false);
     }
-  }, [backendUrl]);
+  }, []);
 
   useEffect(() => {
     fetchNodes();
     // Poll telemetry live every 5 seconds to update pin colors and trust scores
     const interval = setInterval(async () => {
       try {
-        const liveRes = await fetch(`${backendUrl}/telemetry/live`);
+        const liveRes = await fetch(`${API_URL}/telemetry/live`);
         if (liveRes.ok) {
           const liveData = await liveRes.json();
           const ticks = liveData.streaming_ticks || [];
@@ -84,7 +77,7 @@ export default function GeoAnalyticsView() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [backendUrl, fetchNodes]);
+  }, [fetchNodes]);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || nodes[0];
 
@@ -137,7 +130,7 @@ export default function GeoAnalyticsView() {
         <div className="lg:col-span-1">
           <NodeTelemetrySidePanel
             node={selectedNode}
-            backendUrl={backendUrl}
+            backendUrl={API_URL}
             onRefresh={fetchNodes}
             onForecastNodeSelect={(id) => setSelectedNodeId(id)}
           />
@@ -150,14 +143,14 @@ export default function GeoAnalyticsView() {
         <CalibrationChart
           nodeId={selectedNodeId}
           nodeName={selectedNode?.name}
-          backendUrl={backendUrl}
+          backendUrl={API_URL}
         />
 
         {/* Chart 2: 12-Month Forward Forecast Curve with USD Revenue */}
         <ForecastChart
           nodeId={selectedNodeId}
           nodeName={selectedNode?.name}
-          backendUrl={backendUrl}
+          backendUrl={API_URL}
         />
       </div>
     </div>

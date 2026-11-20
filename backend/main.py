@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from database import init_db, get_db, Node, Telemetry, Anomaly, Ledger, Credit, SessionLocal
+from database import init_db, get_db, Node, Telemetry, Anomaly, Ledger, Credit, SessionLocal, DB_PATH
 from seed_and_train import (
     MODEL_XGB_PATH, MODEL_ISO_PATH, MODEL_GBR_PATH,
     run_pipeline, ECOSYSTEM_PARAMS
@@ -30,9 +30,23 @@ from copilot import process_copilot_request, stream_copilot_request, QUICK_PROMP
 async def lifespan(app: FastAPI):
     # Ensure database and models exist
     init_db()
-    if not (os.path.exists(MODEL_XGB_PATH) and os.path.exists(MODEL_ISO_PATH) and os.path.exists(MODEL_GBR_PATH)):
-        print("Models not found. Triggering automated seed and train pipeline...")
+    db_missing_or_empty = not os.path.exists(DB_PATH) or os.path.getsize(DB_PATH) == 0
+    models_missing = not (os.path.exists(MODEL_XGB_PATH) and os.path.exists(MODEL_ISO_PATH) and os.path.exists(MODEL_GBR_PATH))
+    
+    # Check if DB has records
+    db_has_data = False
+    if not db_missing_or_empty:
+        try:
+            with SessionLocal() as session:
+                if session.query(Node).count() > 0:
+                    db_has_data = True
+        except Exception:
+            db_has_data = False
+
+    if db_missing_or_empty or models_missing or not db_has_data:
+        print("Database or ML models missing/empty. Triggering automated seed and train pipeline...")
         run_pipeline()
+
     load_models()
     print("CarbonIQ-MRV Backend and ML Engine initialized successfully.")
     yield
@@ -45,10 +59,16 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS config
+# CORS config supporting ALLOWED_ORIGINS env var
+allowed_origins_raw = os.environ.get("ALLOWED_ORIGINS", "*")
+if not allowed_origins_raw or allowed_origins_raw.strip() == "*":
+    allowed_origins = ["*"]
+else:
+    allowed_origins = [origin.strip() for origin in allowed_origins_raw.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

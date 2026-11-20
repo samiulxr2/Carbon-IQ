@@ -21,6 +21,7 @@ import {
   Layers,
   ArrowRight
 } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 interface StewardInfo {
   name_bn: string;
@@ -100,7 +101,6 @@ const PLOTS = [
 export default function FarmerPortalView() {
   const [lang, setLang] = useState<"bn" | "en">("bn");
   const [selectedNodeId, setSelectedNodeId] = useState<string>("NODE-BD-01");
-  const [backendUrl, setBackendUrl] = useState<string>("http://127.0.0.1:8000");
 
   const [steward, setSteward] = useState<StewardInfo | null>(null);
   const [financials, setFinancials] = useState<FinancialData | null>(null);
@@ -114,20 +114,13 @@ export default function FarmerPortalView() {
   const [playSeconds, setPlaySeconds] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const host = window.location.hostname || "127.0.0.1";
-      setBackendUrl(`http://${host}:8000`);
-    }
-  }, []);
-
   const fetchFarmerData = useCallback(async () => {
     setLoading(true);
     try {
       const plot = PLOTS.find((p) => p.id === selectedNodeId) || PLOTS[0];
       const [earnRes, advRes] = await Promise.all([
-        fetch(`${backendUrl}/farmer/earnings?node_id=${selectedNodeId}&plot_area_ha=${plot.area}`),
-        fetch(`${backendUrl}/farmer/advisories?node_id=${selectedNodeId}`)
+        fetch(`${API_URL}/farmer/earnings?node_id=${selectedNodeId}&plot_area_ha=${plot.area}`),
+        fetch(`${API_URL}/farmer/advisories?node_id=${selectedNodeId}`)
       ]);
 
       if (earnRes.ok) {
@@ -147,7 +140,7 @@ export default function FarmerPortalView() {
     } finally {
       setLoading(false);
     }
-  }, [backendUrl, selectedNodeId]);
+  }, [selectedNodeId]);
 
   useEffect(() => {
     fetchFarmerData();

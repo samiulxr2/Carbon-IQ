@@ -15,6 +15,7 @@ import {
   ExternalLink,
   Lock
 } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 interface LedgerBlock {
   block_index: number;
@@ -56,7 +57,7 @@ export default function LedgerView() {
   const fetchLedger = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/ledger?limit=50");
+      const res = await fetch(`${API_URL}/ledger?limit=50`);
       const data = await res.json();
       if (data.blocks) {
         setBlocks(data.blocks);
@@ -84,7 +85,7 @@ export default function LedgerView() {
   const handleVerifyChain = async () => {
     setIsVerifying(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/ledger/verify");
+      const res = await fetch(`${API_URL}/ledger/verify`);
       const data = await res.json();
       setVerifyResult(data);
     } catch (err) {
@@ -97,7 +98,7 @@ export default function LedgerView() {
   // 2. Export Article 6 Registry JSON handler
   const handleExportRegistry = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/export/registry");
+      const res = await fetch(`${API_URL}/export/registry`);
       const data = await res.json();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -117,7 +118,7 @@ export default function LedgerView() {
   const handleGenerateEsgReport = async () => {
     setIsGeneratingEsg(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/copilot/query", {
+      const res = await fetch(`${API_URL}/copilot/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

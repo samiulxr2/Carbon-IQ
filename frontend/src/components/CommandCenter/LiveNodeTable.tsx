@@ -12,6 +12,7 @@ import {
   MapPin,
   CheckCircle2
 } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 export interface NodeData {
   id: string;
@@ -42,7 +43,7 @@ export default function LiveNodeTable({ nodes, onRefreshNodes }: LiveNodeTablePr
     setLoadingActionNode(nodeId);
     try {
       const tamperType = nodeType === "field" ? "spoof_ndvi" : "co2_spike";
-      await fetch("http://127.0.0.1:8000/simulate/tamper", {
+      await fetch(`${API_URL}/simulate/tamper`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ node_id: nodeId, tamper_type: tamperType })
@@ -58,7 +59,7 @@ export default function LiveNodeTable({ nodes, onRefreshNodes }: LiveNodeTablePr
   const handleReset = async (nodeId: string) => {
     setLoadingActionNode(nodeId);
     try {
-      await fetch("http://127.0.0.1:8000/simulate/reset", {
+      await fetch(`${API_URL}/simulate/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ node_id: nodeId })

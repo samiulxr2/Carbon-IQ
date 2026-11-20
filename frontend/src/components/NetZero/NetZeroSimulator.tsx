@@ -15,6 +15,7 @@ import {
   Zap,
   Target
 } from "lucide-react";
+import { API_URL } from "@/lib/config";
 
 interface TrajectoryPoint {
   year: number;
@@ -63,7 +64,7 @@ export default function NetZeroSimulator() {
   const calculatePathway = useCallback(async (emissions: number, year: number, ratio: number) => {
     setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/netzero", {
+      const res = await fetch(`${API_URL}/netzero`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
