@@ -10,8 +10,8 @@ const BangladeshLeafletMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[520px] rounded-xl border border-emerald-500/20 glass-card flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+      <div className="w-full h-[380px] sm:h-[480px] lg:h-[520px] rounded-[8px] border border-emerald-500/20 glass-card flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" strokeWidth={1.75} />
         <span className="text-xs font-mono text-slate-400">Loading Bangladesh OpenStreetMap Tiles...</span>
       </div>
     )

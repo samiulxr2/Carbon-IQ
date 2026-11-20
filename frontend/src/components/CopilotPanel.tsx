@@ -6,10 +6,7 @@ import {
   Sparkles,
   Send,
   Terminal,
-  ShieldCheck,
-  ShieldAlert,
   Cpu,
-  BookOpen,
   ChevronDown,
   ChevronRight,
   CheckCircle2,
@@ -17,7 +14,6 @@ import {
   Layers,
   FileCheck,
   RefreshCw,
-  Info,
   AlertCircle
 } from "lucide-react";
 import { API_URL } from "@/lib/config";
@@ -35,15 +31,6 @@ interface ToolTrace {
   result?: any;
   latency_ms?: number;
   status: "pending" | "running" | "done" | "error";
-}
-
-interface Citation {
-  id: string;
-  source_title: string;
-  citation_tag: string;
-  category: string;
-  summary: string;
-  relevance_percentage: string;
 }
 
 const DEFAULT_CHIPS: QuickChip[] = [
@@ -169,7 +156,6 @@ export default function CopilotPanel() {
       setIsLoading(false);
     } catch (err: any) {
       console.warn("SSE stream interrupted, fallback to sync endpoint:", err);
-      // Fallback to synchronous endpoint
       try {
         const fallbackRes = await fetch(`${backendUrl}/copilot/query`, {
           method: "POST",
@@ -188,8 +174,8 @@ export default function CopilotPanel() {
           }))
         );
         setStreamedText(syncData.response || "No response received.");
-      } catch (syncErr: any) {
-        setErrorMsg(`Failed to connect to CarbonIQ backend at ${API_URL}. Ensure uvicorn is running.`);
+      } catch {
+        setErrorMsg(`Failed to connect to CarbonIQ backend at ${API_URL}. Ensure server is running.`);
       } finally {
         setIsLoading(false);
       }
@@ -199,43 +185,42 @@ export default function CopilotPanel() {
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Copilot Header Card */}
-      <div className="glass-card p-6 border-emerald-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="glass-card p-5 border-emerald-500/20 relative">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <Sparkles className="w-5 h-5 animate-pulse" />
+            <div className="w-8 h-8 rounded-[6px] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <Sparkles className="w-4 h-4" strokeWidth={1.75} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold tracking-tight text-white">
+                <h2 className="text-base font-semibold tracking-tight text-white">
                   Scientific MRV Copilot
                 </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
-                  MCP Protocol Native
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  Tool Engine
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  Zero External LLM APIs
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Local RAG
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-mono mt-0.5">
-                Deterministic NLP Router • In-Process MCP Tool Engine • IPCC TF-IDF Knowledge Retrieval
+              <p className="text-xs text-slate-400 mt-0.5">
+                Deterministic NLP Router &bull; In-Process Tool Execution &bull; IPCC Knowledge Retrieval
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-400 bg-[#060D0A]/70 px-3 py-1.5 rounded-lg border border-emerald-500/15">
-            <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="flex items-center gap-2 text-xs font-mono text-slate-400 bg-[#060D0A] px-3 py-1.5 rounded-[6px] border border-slate-800">
+            <Cpu className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.75} />
             <span>XGBoost + IsolationForest + GBR</span>
           </div>
         </div>
 
         {/* Quick-Prompt Chips */}
-        <div className="mt-5 pt-4 border-t border-emerald-500/15">
-          <div className="flex items-center gap-2 mb-2.5">
-            <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-xs font-mono text-slate-300 font-semibold tracking-wide uppercase">
-              Quick Audit & Simulation Chips:
+        <div className="mt-4 pt-3 border-t border-slate-800">
+          <div className="flex items-center gap-2 mb-2">
+            <Terminal className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.75} />
+            <span className="text-xs font-mono text-slate-300 font-medium uppercase tracking-wide">
+              Quick Audit &amp; Simulation Queries:
             </span>
           </div>
 
@@ -245,20 +230,20 @@ export default function CopilotPanel() {
                 key={chip.id}
                 onClick={() => handleRunQuery(chip.prompt)}
                 disabled={isLoading}
-                className="group text-left p-3 rounded-lg bg-[#060D0A]/80 border border-emerald-500/20 hover:border-emerald-400/50 hover:bg-emerald-950/20 transition-all duration-150 flex flex-col justify-between"
+                className="group text-left p-2.5 rounded-[6px] bg-[#060D0A] border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-900/50 transition-colors flex flex-col justify-between"
               >
                 <div className="flex items-center justify-between w-full mb-1">
-                  <span className="text-xs font-semibold text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                  <span className="text-xs font-medium text-emerald-400 group-hover:text-emerald-300 transition-colors">
                     {chip.title}
                   </span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400/80">
-                    {chip.category === "telemetry_audit" && "Tamper Audit"}
-                    {chip.category === "netzero_pathway" && "SBTi Pathway"}
-                    {chip.category === "model_inference" && "XGBoost MRV"}
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400/80">
+                    {chip.category === "telemetry_audit" && "Audit"}
+                    {chip.category === "netzero_pathway" && "SBTi"}
+                    {chip.category === "model_inference" && "MRV"}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed font-sans">
-                  "{chip.prompt}"
+                  &ldquo;{chip.prompt}&rdquo;
                 </p>
               </button>
             ))}
@@ -278,24 +263,24 @@ export default function CopilotPanel() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask an IPCC accounting question or enter custom telemetry parameters..."
+              placeholder="Ask an IPCC accounting question or enter station telemetry parameters..."
               disabled={isLoading}
-              className="w-full px-4 py-2.5 rounded-lg bg-[#060D0A] border border-emerald-500/30 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-400 font-sans disabled:opacity-50"
+              className="w-full px-3.5 py-2 rounded-[6px] bg-[#060D0A] border border-slate-800 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500 font-sans disabled:opacity-50"
             />
           </div>
           <button
             type="submit"
             disabled={isLoading || !query.trim()}
-            className="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm flex items-center gap-2 transition-all disabled:opacity-50 disabled:hover:bg-emerald-500"
+            className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5"
           >
             {isLoading ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" strokeWidth={1.75} />
                 <span>Running...</span>
               </>
             ) : (
               <>
-                <Send className="w-4 h-4" />
+                <Send className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span>Execute</span>
               </>
             )}
@@ -303,8 +288,8 @@ export default function CopilotPanel() {
         </form>
 
         {errorMsg && (
-          <div className="mt-3 p-3 rounded-lg bg-red-950/40 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="mt-3 p-2.5 rounded-[6px] bg-red-950/40 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" strokeWidth={1.75} />
             <span>{errorMsg}</span>
           </div>
         )}
@@ -313,47 +298,47 @@ export default function CopilotPanel() {
       {/* Execution Results View */}
       {(toolTraces.length > 0 || streamedText) && (
         <div className="space-y-6">
-          {/* Active Intent & Live MCP Tool Traces */}
+          {/* Active Intent & Live Tool Traces */}
           <div className="glass-card p-5 border-emerald-500/20">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2.5">
-                <Layers className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold">
-                  Live MCP Tool Execution Pipeline
+                <Layers className="w-4 h-4 text-cyan-400" strokeWidth={1.75} />
+                <span className="text-xs font-mono uppercase tracking-wider text-slate-300 font-medium">
+                  Tool Execution Pipeline
                 </span>
                 {activeIntent && (
-                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+                  <span className="text-xs font-mono px-2 py-0.2 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                     Intent: {activeIntent}
                   </span>
                 )}
               </div>
-              <div className="text-[11px] font-mono text-slate-400">
-                {toolTraces.filter((t) => t.status === "done").length} of {toolTraces.length} tools executed
+              <div className="text-[11px] font-mono text-slate-500">
+                {toolTraces.filter((t) => t.status === "done").length} of {toolTraces.length} executed
               </div>
             </div>
 
             {/* Tool Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
               {toolTraces.map((trace, idx) => (
                 <div
                   key={idx}
-                  className="rounded-lg bg-[#060D0A]/90 border border-emerald-500/20 p-3.5 flex flex-col justify-between"
+                  className="rounded-[6px] bg-[#060D0A] border border-slate-800 p-3 flex flex-col justify-between"
                 >
-                  <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
                     <div className="flex items-center gap-2 font-mono text-xs">
                       {trace.status === "done" ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.75} />
                       ) : trace.status === "running" ? (
-                        <RefreshCw className="w-4 h-4 text-cyan-400 animate-spin" />
+                        <RefreshCw className="w-3.5 h-3.5 text-cyan-400 animate-spin" strokeWidth={1.75} />
                       ) : (
-                        <Clock className="w-4 h-4 text-slate-500" />
+                        <Clock className="w-3.5 h-3.5 text-slate-500" strokeWidth={1.75} />
                       )}
                       <span className="font-semibold text-slate-200">{trace.tool}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       {trace.latency_ms !== undefined && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700/50">
                           {trace.latency_ms} ms
                         </span>
                       )}
@@ -363,9 +348,9 @@ export default function CopilotPanel() {
                         title="Inspect tool payload"
                       >
                         {expandedTools[idx] ? (
-                          <ChevronDown className="w-4 h-4" />
+                          <ChevronDown className="w-3.5 h-3.5" />
                         ) : (
-                          <ChevronRight className="w-4 h-4" />
+                          <ChevronRight className="w-3.5 h-3.5" />
                         )}
                       </button>
                     </div>
@@ -375,12 +360,12 @@ export default function CopilotPanel() {
                   <div className="text-xs text-slate-400 font-mono">
                     {trace.tool === "get_live_sensor_telemetry" && trace.result && (
                       <span className="text-emerald-400">
-                        Node: {trace.result.node_name} • Trust: {trace.result.trust_score}% • Stock: {trace.result.current_carbon_stock_tco2e_ha} tCO2e/ha
+                        Station: {trace.result.node_name} &bull; Trust: {trace.result.trust_score}% &bull; Stock: {trace.result.current_carbon_stock_tco2e_ha} t/ha
                       </span>
                     )}
                     {trace.tool === "simulate_net_zero_gap" && trace.result && (
                       <span className="text-cyan-400">
-                        Target: {trace.result.target_year} • Bioreactors: {trace.result.assets_required?.microalgae_bioreactors_count} • Mangrove: {trace.result.assets_required?.blue_carbon_mangrove_ha} ha
+                        Target: {trace.result.target_year} &bull; Bioreactors: {trace.result.assets_required?.microalgae_bioreactors_count} &bull; Mangrove: {trace.result.assets_required?.blue_carbon_mangrove_ha} ha
                       </span>
                     )}
                     {trace.tool === "run_carbon_stock_inference" && trace.result && (
@@ -390,7 +375,7 @@ export default function CopilotPanel() {
                     )}
                     {trace.tool === "check_sensor_anomaly" && trace.result && (
                       <span className={trace.result.is_anomaly ? "text-red-400" : "text-emerald-400"}>
-                        Status: {trace.result.status} • Trust Score: {trace.result.trust_score}/100
+                        Status: {trace.result.status} &bull; Trust Score: {trace.result.trust_score}/100
                       </span>
                     )}
                     {trace.tool === "query_ipcc_guidelines" && trace.result && (
@@ -407,14 +392,14 @@ export default function CopilotPanel() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="mt-3 pt-2.5 border-t border-slate-800 text-[11px] font-mono overflow-x-auto"
+                        className="mt-2.5 pt-2 border-t border-slate-800 text-[11px] font-mono overflow-x-auto"
                       >
                         <div className="mb-1 text-slate-500 uppercase tracking-wider text-[9px]">Input Parameters:</div>
-                        <pre className="p-2 rounded bg-black/60 text-slate-300 mb-2">
+                        <pre className="p-2 rounded-[4px] bg-black/60 text-slate-300 mb-2">
                           {JSON.stringify(trace.arguments, null, 2)}
                         </pre>
                         <div className="mb-1 text-slate-500 uppercase tracking-wider text-[9px]">Tool Result:</div>
-                        <pre className="p-2 rounded bg-black/60 text-emerald-400/90 max-h-40 overflow-y-auto">
+                        <pre className="p-2 rounded-[4px] bg-black/60 text-emerald-400/90 max-h-40 overflow-y-auto">
                           {JSON.stringify(trace.result, null, 2)}
                         </pre>
                       </motion.div>
@@ -426,34 +411,34 @@ export default function CopilotPanel() {
           </div>
 
           {/* Formatted Scientific Output Report */}
-          <div className="glass-card p-6 border-emerald-500/20 relative">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-emerald-500/20">
+          <div className="glass-card p-5 border-emerald-500/20 relative">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
               <div className="flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-base font-bold text-white tracking-tight">
+                <FileCheck className="w-4 h-4 text-emerald-400" strokeWidth={1.75} />
+                <h3 className="text-sm font-semibold text-white tracking-tight">
                   Synthesized Scientific MRV Intelligence Report
                 </h3>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <span className="text-[10px] font-mono px-2 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   Article 6.2 ITMO Verified
                 </span>
               </div>
             </div>
 
             {/* Markdown Report Render */}
-            <div className="prose-carbon text-sm leading-relaxed text-slate-200">
+            <div className="prose-carbon text-xs leading-relaxed text-slate-200">
               {streamedText.split("\n").map((line, lIdx) => {
                 if (line.startsWith("### ")) {
                   return (
-                    <h3 key={lIdx} className="text-lg font-bold text-emerald-400 mt-4 mb-2 flex items-center gap-2">
+                    <h3 key={lIdx} className="text-sm font-semibold text-emerald-400 mt-3 mb-1.5 flex items-center gap-2">
                       {line.replace("### ", "")}
                     </h3>
                   );
                 }
                 if (line.startsWith("#### ")) {
                   return (
-                    <h4 key={lIdx} className="text-sm font-semibold text-cyan-400 mt-3 mb-1">
+                    <h4 key={lIdx} className="text-xs font-semibold text-cyan-400 mt-2 mb-1">
                       {line.replace("#### ", "")}
                     </h4>
                   );
@@ -467,13 +452,12 @@ export default function CopilotPanel() {
                 }
                 if (line.startsWith("- ")) {
                   return (
-                    <li key={lIdx} className="ml-4 list-disc text-slate-300 my-1">
+                    <li key={lIdx} className="ml-4 list-disc text-slate-300 my-0.5">
                       {line.replace("- ", "")}
                     </li>
                   );
                 }
                 if (line.startsWith("|")) {
-                  // Render table line simply or nicely
                   return (
                     <div key={lIdx} className="font-mono text-xs text-slate-300 py-0.5">
                       {line}
@@ -481,17 +465,17 @@ export default function CopilotPanel() {
                   );
                 }
                 if (line.trim() === "") {
-                  return <div key={lIdx} className="h-2" />;
+                  return <div key={lIdx} className="h-1.5" />;
                 }
                 return (
-                  <p key={lIdx} className="my-1.5 text-slate-300">
+                  <p key={lIdx} className="my-1 text-slate-300">
                     {line}
                   </p>
                 );
               })}
 
               {isLoading && (
-                <span className="inline-block w-2 h-4 bg-emerald-400 animate-pulse ml-1" />
+                <span className="inline-block w-1.5 h-3 bg-emerald-400 animate-pulse ml-1" />
               )}
             </div>
 

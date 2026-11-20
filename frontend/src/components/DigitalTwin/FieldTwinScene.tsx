@@ -238,7 +238,7 @@ export default function FieldTwinScene({
                 : "bg-emerald-950/90 border-emerald-500 text-emerald-300"
             }`}
           >
-            {isTampered ? "⚠️ BEACON: TAMPERED" : "NODE-BD-01 BEACON"}
+            {isTampered ? "ALERT: SENSOR TAMPERED" : "NODE-BD-01 BEACON"}
           </div>
         </Html>
       </group>

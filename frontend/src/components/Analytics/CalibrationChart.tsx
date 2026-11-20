@@ -11,7 +11,7 @@ import {
   Tooltip,
   Legend
 } from "recharts";
-import { Cpu, ShieldCheck, Activity, RefreshCw } from "lucide-react";
+import { Cpu, RefreshCw, AlertCircle } from "lucide-react";
 
 interface CalibrationPoint {
   id: number;
@@ -33,7 +33,6 @@ interface CalibrationChartProps {
 
 export default function CalibrationChart({
   nodeId,
-  nodeName,
   backendUrl
 }: CalibrationChartProps) {
   const [data, setData] = useState<CalibrationPoint[]>([]);
@@ -68,14 +67,14 @@ export default function CalibrationChart({
   return (
     <div className="glass-card p-5 border-emerald-500/20 space-y-4">
       {/* Chart Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-500/15 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
         <div>
           <div className="flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-sm font-bold text-white tracking-wide">
-              Raw Proxy vs AI-Calibrated Carbon Stock
+            <Cpu className="w-4 h-4 text-emerald-400" strokeWidth={1.75} />
+            <h3 className="text-sm font-semibold text-white tracking-wide">
+              Raw Proxy vs AI-Calibrated Stock
             </h3>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+            <span className="text-[10px] font-mono px-2 py-0.2 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
               {nodeId}
             </span>
           </div>
@@ -86,14 +85,14 @@ export default function CalibrationChart({
 
         <div className="flex items-center gap-2">
           {/* Points limit selector */}
-          <div className="flex items-center rounded-lg bg-[#060D0A] border border-emerald-500/20 p-0.5 text-xs font-mono">
+          <div className="flex items-center rounded-[6px] bg-[#060D0A] border border-slate-800 p-0.5 text-xs font-mono">
             {[15, 30, 60].map((val) => (
               <button
                 key={val}
                 onClick={() => setLimit(val)}
-                className={`px-2 py-1 rounded text-[11px] font-bold transition-colors ${
+                className={`px-2 py-1 rounded-[4px] text-[11px] font-medium transition-colors ${
                   limit === val
-                    ? "bg-emerald-500 text-black"
+                    ? "bg-emerald-500 text-black font-semibold"
                     : "text-slate-400 hover:text-white"
                 }`}
               >
@@ -105,58 +104,60 @@ export default function CalibrationChart({
           <button
             onClick={fetchData}
             title="Refresh History"
-            className="p-1.5 rounded-lg bg-[#060D0A] border border-emerald-500/20 text-slate-400 hover:text-emerald-400 transition-colors"
+            className="p-1.5 rounded-[6px] bg-[#060D0A] border border-slate-800 text-slate-400 hover:text-emerald-400 transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} strokeWidth={1.75} />
           </button>
         </div>
       </div>
 
       {/* Model Performance Pill Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs">
-        <div className="p-2 rounded-lg bg-[#060D0A] border border-emerald-500/15">
-          <div className="text-[10px] text-slate-400">ML Model</div>
-          <div className="text-emerald-400 font-bold truncate">XGBRegressor</div>
+        <div className="p-2 rounded-[6px] bg-[#060D0A] border border-slate-800">
+          <div className="text-[10px] text-slate-500">ML Model</div>
+          <div className="text-emerald-400 font-semibold truncate">XGBRegressor</div>
         </div>
-        <div className="p-2 rounded-lg bg-[#060D0A] border border-emerald-500/15">
-          <div className="text-[10px] text-slate-400">Calibration Accuracy</div>
-          <div className="text-emerald-400 font-bold">R² = 0.9997</div>
+        <div className="p-2 rounded-[6px] bg-[#060D0A] border border-slate-800">
+          <div className="text-[10px] text-slate-500">Validation R²</div>
+          <div className="text-emerald-400 font-semibold">0.9997</div>
         </div>
-        <div className="p-2 rounded-lg bg-[#060D0A] border border-emerald-500/15">
-          <div className="text-[10px] text-slate-400">Mean Abs Error</div>
-          <div className="text-cyan-400 font-bold">0.68 tCO2e/ha</div>
+        <div className="p-2 rounded-[6px] bg-[#060D0A] border border-slate-800">
+          <div className="text-[10px] text-slate-500">Mean Abs Error</div>
+          <div className="text-cyan-400 font-semibold">0.68 t/ha</div>
         </div>
-        <div className="p-2 rounded-lg bg-[#060D0A] border border-emerald-500/15">
-          <div className="text-[10px] text-slate-400">Noise Denoised</div>
-          <div className="text-amber-400 font-bold">±{avgVariance} t/ha</div>
+        <div className="p-2 rounded-[6px] bg-[#060D0A] border border-slate-800">
+          <div className="text-[10px] text-slate-500">Noise Attenuation</div>
+          <div className="text-amber-400 font-semibold">&plusmn;{avgVariance} t/ha</div>
         </div>
       </div>
 
       {/* Recharts Area Container */}
-      <div className="w-full h-[320px]">
+      <div className="w-full h-[300px]">
         {loading && data.length === 0 ? (
-          <div className="w-full h-full flex items-center justify-center font-mono text-xs text-slate-500">
-            Loading telemetry calibration stream...
+          <div className="w-full h-full flex items-center justify-center font-mono text-xs text-slate-500 gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" strokeWidth={1.75} />
+            <span>Loading telemetry calibration stream...</span>
           </div>
         ) : error ? (
-          <div className="w-full h-full flex items-center justify-center font-mono text-xs text-red-400">
-            {error}
+          <div className="w-full h-full flex flex-col items-center justify-center font-mono text-xs text-red-400 gap-2">
+            <AlertCircle className="w-5 h-5" strokeWidth={1.75} />
+            <span>{error}</span>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
               <defs>
                 <linearGradient id="calibratedGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.35} />
+                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.25} />
                   <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="rawGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.15} />
+                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.12} />
                   <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
 
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(16, 185, 129, 0.1)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(16, 185, 129, 0.08)" />
               <XAxis
                 dataKey="time_label"
                 stroke="#64748B"
@@ -177,11 +178,11 @@ export default function CalibrationChart({
                   if (active && payload && payload.length) {
                     const d = payload[0].payload as CalibrationPoint;
                     return (
-                      <div className="p-3 rounded-lg bg-[#0D1914] border border-emerald-500/30 shadow-xl font-mono text-xs space-y-1 z-50">
-                        <div className="text-[10px] text-slate-400 font-bold border-b border-emerald-500/20 pb-1">
+                      <div className="p-3 rounded-[6px] bg-[#0D1914] border border-slate-800 shadow-xl font-mono text-xs space-y-1 z-50">
+                        <div className="text-[10px] text-slate-400 font-semibold border-b border-slate-800 pb-1">
                           {label} ({d.timestamp.split("T")[-1]?.slice(0, 8)})
                         </div>
-                        <div className="flex items-center justify-between gap-4 text-emerald-400 font-bold">
+                        <div className="flex items-center justify-between gap-4 text-emerald-400 font-medium">
                           <span>AI-Calibrated:</span>
                           <span>{d.ai_calibrated_stock} tCO2e/ha</span>
                         </div>
@@ -189,13 +190,13 @@ export default function CalibrationChart({
                           <span>Raw Uncalibrated:</span>
                           <span>{d.raw_proxy_stock} tCO2e/ha</span>
                         </div>
-                        <div className="flex items-center justify-between gap-4 text-slate-300 text-[10px] border-t border-emerald-500/10 pt-1">
+                        <div className="flex items-center justify-between gap-4 text-slate-300 text-[10px] border-t border-slate-800 pt-1">
                           <span>Noise Filtered:</span>
-                          <span className="text-cyan-400">±{d.variance_filtered} tCO2e</span>
+                          <span className="text-cyan-400">&plusmn;{d.variance_filtered} t</span>
                         </div>
                         <div className="flex items-center justify-between gap-4 text-[10px]">
                           <span className="text-slate-400">Trust Score:</span>
-                          <span className={d.trust_score >= 95 ? "text-emerald-400 font-bold" : "text-red-400 font-bold"}>
+                          <span className={d.trust_score >= 95 ? "text-emerald-400 font-medium" : "text-red-400 font-medium"}>
                             {d.trust_score}%
                           </span>
                         </div>
@@ -216,24 +217,22 @@ export default function CalibrationChart({
                 }}
               />
 
-              {/* Raw Proxy curve with dashed noise */}
               <Area
                 type="monotone"
                 dataKey="raw_proxy_stock"
                 name="Raw Satellite/Sensor Proxy (Uncalibrated)"
                 stroke="#F59E0B"
                 strokeDasharray="4 4"
-                strokeWidth={1.8}
+                strokeWidth={1.5}
                 fill="url(#rawGradient)"
               />
 
-              {/* AI-Calibrated curve with solid emerald glow */}
               <Area
                 type="monotone"
                 dataKey="ai_calibrated_stock"
                 name="AI-Calibrated Carbon Stock (XGBoost)"
                 stroke="#10B981"
-                strokeWidth={2.4}
+                strokeWidth={2}
                 fill="url(#calibratedGradient)"
               />
             </AreaChart>

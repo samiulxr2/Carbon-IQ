@@ -32,7 +32,7 @@ export default function DigitalTwinCanvas({
   pumpSpeed
 }: DigitalTwinCanvasProps) {
   return (
-    <div className="w-full h-[420px] rounded-xl overflow-hidden bg-gradient-to-b from-[#060D0A] to-[#0A1410] border border-emerald-500/20 relative">
+    <div className="w-full h-[360px] sm:h-[400px] lg:h-[420px] rounded-[8px] overflow-hidden bg-[#0A1410] border border-emerald-500/20 relative">
       <Canvas
         camera={{ position: [4.5, 3.2, 5.5], fov: 42 }}
         dpr={[1, 1.5]}
@@ -78,12 +78,6 @@ export default function DigitalTwinCanvas({
           maxPolarAngle={Math.PI / 2 + 0.05}
         />
       </Canvas>
-
-      {/* Floating 3D Navigation Hint */}
-      <div className="absolute bottom-2.5 right-3 px-2.5 py-1 rounded-md bg-black/70 border border-emerald-500/20 text-[10px] font-mono text-slate-400 pointer-events-none flex items-center gap-1.5 backdrop-blur-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <span>Rotate: Click + Drag • Zoom: Scroll • Select: Click Mesh</span>
-      </div>
     </div>
   );
 }

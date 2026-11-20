@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CommandCenterView from "@/components/CommandCenter/CommandCenterView";
 import GeoAnalyticsView from "@/components/GeoMap/GeoAnalyticsView";
@@ -19,12 +19,18 @@ import {
   Sparkles
 } from "lucide-react";
 
-type TabKey = "command_center" | "geo_map" | "farmer_portal" | "netzero_simulator" | "ledger" | "digital_twin" | "copilot";
+type TabKey =
+  | "command_center"
+  | "geo_map"
+  | "farmer_portal"
+  | "netzero_simulator"
+  | "ledger"
+  | "digital_twin"
+  | "copilot";
 
 interface TabItem {
   key: TabKey;
   label: string;
-  badge?: string;
   icon: React.ElementType;
 }
 
@@ -32,55 +38,61 @@ const TABS: TabItem[] = [
   {
     key: "command_center",
     label: "Command Center",
-    badge: "Live 5s",
     icon: LayoutDashboard
   },
   {
     key: "geo_map",
-    label: "Geo Map & Analytics",
-    badge: "Phase 3",
+    label: "Geo Analytics",
     icon: MapPin
   },
   {
     key: "farmer_portal",
-    label: "কৃষক পোর্টাল (Farmer)",
-    badge: "Phase 5",
+    label: "Farmers",
     icon: Sprout
   },
   {
     key: "netzero_simulator",
-    label: "Net-Zero Simulator",
-    badge: "SBTi 1.5°C",
+    label: "Net-Zero",
     icon: Target
   },
   {
     key: "ledger",
-    label: "SHA-256 Ledger",
-    badge: "Article 6",
+    label: "Ledger",
     icon: Hash
   },
   {
     key: "digital_twin",
-    label: "3D Digital Twin",
-    badge: "Phase 6",
+    label: "3D Twin",
     icon: Activity
   },
   {
     key: "copilot",
-    label: "Scientific Copilot",
-    badge: "Phase 4",
+    label: "Copilot",
     icon: Sparkles
   }
 ];
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<TabKey>("command_center");
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  // Auto-scroll active tab into view when selected on scrollable screens
+  useEffect(() => {
+    const el = tabRefs.current[activeTab];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, [activeTab]);
 
   return (
-    <div className="px-4 py-6 max-w-7xl mx-auto space-y-6">
-      {/* Top-Level Navigation Bar with Framer Motion Tabs */}
-      <div className="glass-card p-1.5 border-emerald-500/20 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-1.5">
+    <div className="px-4 sm:px-6 py-6 max-w-7xl mx-auto space-y-6">
+      {/* Top Navigation Bar */}
+      <nav
+        aria-label="Main Navigation"
+        className="glass-card p-1.5 border-slate-800/80 relative overflow-hidden"
+      >
+        {/* Scrollable track below lg; evenly spaced 7-col grid on lg and up */}
+        <div className="flex lg:grid lg:grid-cols-7 items-center gap-1.5 overflow-x-auto snap-x no-scrollbar py-0.5 w-full">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
@@ -88,59 +100,49 @@ export default function HomePage() {
             return (
               <button
                 key={tab.key}
+                ref={(el) => {
+                  tabRefs.current[tab.key] = el;
+                }}
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative px-4 py-2.5 rounded-lg text-xs font-mono font-semibold flex items-center gap-2 transition-all ${
+                className={`relative py-2 px-3.5 rounded-[6px] text-xs font-medium flex items-center justify-center gap-2 whitespace-nowrap snap-center shrink-0 lg:shrink lg:w-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 ${
                   isActive
-                    ? "text-black font-bold"
-                    : "text-slate-400 hover:text-white hover:bg-slate-900/60"
+                    ? "text-black font-semibold"
+                    : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/40"
                 }`}
               >
-                {/* Active Tab Background Pill Animation */}
                 {isActive && (
                   <motion.div
                     layoutId="active-tab-indicator"
-                    className="absolute inset-0 bg-emerald-500 rounded-lg shadow-lg shadow-emerald-500/25"
+                    className="absolute inset-0 bg-emerald-500 rounded-[6px]"
                     transition={{ type: "spring", stiffness: 450, damping: 35 }}
                   />
                 )}
 
-                <span className="relative z-10 flex items-center gap-2">
-                  <Icon className="w-4 h-4" />
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <Icon className="w-4 h-4 shrink-0" strokeWidth={1.75} />
                   <span>{tab.label}</span>
-                  {tab.badge && (
-                    <span
-                      className={`text-[9px] uppercase px-1.5 py-0.5 rounded ${
-                        isActive
-                          ? "bg-black/20 text-black font-bold"
-                          : "bg-slate-800 text-slate-300"
-                      }`}
-                    >
-                      {tab.badge}
-                    </span>
-                  )}
                 </span>
               </button>
             );
           })}
         </div>
 
-        {/* Live Network Pill Indicator */}
-        <div className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-md bg-[#060D0A] border border-emerald-500/15 text-xs font-mono">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-slate-300">FastAPI ML Cluster:</span>
-          <span className="text-emerald-400 font-bold">ACTIVE</span>
-        </div>
-      </div>
+        {/* Subtle right fade gradient as scroll hint on mobile (< lg) */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#0D1914] to-transparent lg:hidden z-20"
+        />
+      </nav>
 
       {/* Main Tab Content View with Page Transition */}
-      <main className="min-h-[550px]">
+      <div className="min-h-[550px] tab-content-container">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
           >
             {activeTab === "command_center" && <CommandCenterView />}
             {activeTab === "geo_map" && <GeoAnalyticsView />}
@@ -151,7 +153,7 @@ export default function HomePage() {
             {activeTab === "copilot" && <CopilotPanel />}
           </motion.div>
         </AnimatePresence>
-      </main>
+      </div>
     </div>
   );
 }

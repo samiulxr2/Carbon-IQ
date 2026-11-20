@@ -293,7 +293,7 @@ export default function BioReactorTwinScene({
                 : "bg-emerald-950/90 border-emerald-500 text-emerald-300"
             }`}
           >
-            {isTampered ? "⚠️ BIO-BEACON: TAMPERED" : "NODE-BD-06 BEACON"}
+            {isTampered ? "ALERT: SENSOR TAMPERED" : "NODE-BD-06 BEACON"}
           </div>
         </Html>
       </group>

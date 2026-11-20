@@ -5,12 +5,14 @@ import PipelineStepper from "./PipelineStepper";
 import KPICounters from "./KPICounters";
 import LiveNodeTable, { NodeData } from "./LiveNodeTable";
 import { API_URL } from "@/lib/config";
+import { RefreshCw, Activity } from "lucide-react";
 
 export default function CommandCenterView() {
   const [nodes, setNodes] = useState<NodeData[]>([]);
   const [totalCredits, setTotalCredits] = useState(3250.75);
   const [marketValueUsd, setMarketValueUsd] = useState(92646.38);
   const [systemTrustScore, setSystemTrustScore] = useState(97.8);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchNodes = useCallback(async () => {
     try {
@@ -35,6 +37,8 @@ export default function CommandCenterView() {
       }
     } catch (err) {
       console.warn("Failed to fetch node data:", err);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -48,10 +52,21 @@ export default function CommandCenterView() {
 
   return (
     <div className="space-y-6">
-      {/* 5-Step Continuous Pipeline Stepper */}
+      {/* Backend connection warning / waking banner if still loading after delay */}
+      {isLoading && nodes.length === 0 && (
+        <div className="glass-card p-3 border-emerald-500/20 flex items-center justify-between text-xs text-slate-300 font-mono">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4 text-emerald-400 animate-spin" strokeWidth={1.75} />
+            <span>Connecting to CarbonIQ Engine... Initial spin-up on cloud tiers may take up to 45 seconds.</span>
+          </div>
+          <span className="text-[11px] text-slate-500 hidden sm:inline">Automatic Retry Active</span>
+        </div>
+      )}
+
+      {/* 5-Step Pipeline Stepper */}
       <PipelineStepper onTickReceived={handleTickReceived} />
 
-      {/* KPI Real Counter Cards */}
+      {/* KPI Counters */}
       <KPICounters
         totalCredits={totalCredits}
         marketValueUsd={marketValueUsd}
@@ -59,7 +74,7 @@ export default function CommandCenterView() {
         systemTrustScore={systemTrustScore}
       />
 
-      {/* Live Node Table with Trust Score Badges & Gatekeeper Action */}
+      {/* Live Node Table */}
       <LiveNodeTable nodes={nodes} onRefreshNodes={fetchNodes} />
     </div>
   );

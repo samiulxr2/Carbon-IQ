@@ -1,18 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
 import {
-  Sliders,
-  Cpu,
   Trees,
   TrendingDown,
   DollarSign,
   Calendar,
-  CheckCircle2,
-  RefreshCw,
-  Award,
-  Zap,
   Target
 } from "lucide-react";
 import { API_URL } from "@/lib/config";
@@ -58,7 +51,7 @@ export default function NetZeroSimulator() {
   const [monthlyEmissions, setMonthlyEmissions] = useState<number>(450);
   const [targetYear, setTargetYear] = useState<number>(2030);
   const [blueCarbonRatio, setBlueCarbonRatio] = useState<number>(0.65);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<NetZeroData | null>(null);
 
   const calculatePathway = useCallback(async (emissions: number, year: number, ratio: number) => {
@@ -98,35 +91,35 @@ export default function NetZeroSimulator() {
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Header Banner */}
-      <div className="glass-card p-6 border-emerald-500/20 relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="glass-card p-5 border-emerald-500/20 relative">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <Target className="w-5 h-5 animate-pulse" />
+            <div className="w-8 h-8 rounded-[6px] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <Target className="w-4 h-4" strokeWidth={1.75} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold tracking-tight text-white">
-                  Corporate Net-Zero Strategy Simulator
+                <h2 className="text-base font-semibold tracking-tight text-white">
+                  Corporate Net-Zero Simulator
                 </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
-                  SBTi 1.5°C Aligned
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  SBTi 1.5°C
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-mono mt-0.5">
-                Dynamic Portfolio Allocation • Microalgae PBRs + Mangrove Blue Carbon • Article 6 Economics
+              <p className="text-xs text-slate-400 mt-0.5">
+                Portfolio Allocation &bull; Microalgae PBRs & Mangrove Blue Carbon &bull; Article 6 Economics
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-300 bg-[#060D0A] px-3 py-1.5 rounded-lg border border-emerald-500/20">
-            <DollarSign className="w-3.5 h-3.5 text-amber-400" />
-            <span>Article 6.2 Carbon Value: <strong>$28.50/t</strong></span>
+          <div className="flex items-center gap-2 text-xs font-mono text-slate-300 bg-[#060D0A] px-3 py-1.5 rounded-[6px] border border-slate-800">
+            <DollarSign className="w-3.5 h-3.5 text-amber-400" strokeWidth={1.75} />
+            <span>Benchmark Carbon Price: <strong>$28.50/t</strong></span>
           </div>
         </div>
 
         {/* Quick Emission Presets */}
-        <div className="mt-5 pt-4 border-t border-emerald-500/15 flex flex-wrap items-center gap-2 text-xs font-mono">
+        <div className="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2 text-xs font-mono">
           <span className="text-slate-400 text-[11px] uppercase tracking-wider">Presets:</span>
           {[
             { label: "SME (250 t/mo)", val: 250 },
@@ -137,9 +130,9 @@ export default function NetZeroSimulator() {
             <button
               key={preset.val}
               onClick={() => setMonthlyEmissions(preset.val)}
-              className={`px-2.5 py-1 rounded border transition-colors ${
+              className={`px-2.5 py-1 rounded-[6px] border text-xs transition-colors ${
                 monthlyEmissions === preset.val
-                  ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 font-bold"
+                  ? "bg-emerald-500 text-black font-semibold border-emerald-500"
                   : "bg-[#060D0A] border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
               }`}
             >
@@ -150,16 +143,16 @@ export default function NetZeroSimulator() {
       </div>
 
       {/* Sliders Grid */}
-      <div className="glass-card p-6 border-emerald-500/20 space-y-6">
+      <div className="glass-card p-5 border-emerald-500/20 space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Slider 1: Monthly Emissions */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-slate-300 font-semibold flex items-center gap-1.5">
-                <TrendingDown className="w-4 h-4 text-emerald-400" />
+              <span className="text-slate-300 font-medium flex items-center gap-1.5">
+                <TrendingDown className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.75} />
                 Monthly Emissions:
               </span>
-              <span className="text-emerald-400 font-bold text-sm">
+              <span className="text-emerald-400 font-semibold text-sm">
                 {monthlyEmissions.toLocaleString()} <span className="text-xs font-normal text-slate-400">tCO2e</span>
               </span>
             </div>
@@ -182,11 +175,11 @@ export default function NetZeroSimulator() {
           {/* Slider 2: Target Net-Zero Year */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-slate-300 font-semibold flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-cyan-400" />
-                Target Year:
+              <span className="text-slate-300 font-medium flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-cyan-400" strokeWidth={1.75} />
+                Target Commitment:
               </span>
-              <span className="text-cyan-400 font-bold text-sm">
+              <span className="text-cyan-400 font-semibold text-sm">
                 {targetYear} <span className="text-xs font-normal text-slate-400">({targetYear - 2026} yrs)</span>
               </span>
             </div>
@@ -201,7 +194,7 @@ export default function NetZeroSimulator() {
             />
             <div className="flex justify-between text-[10px] font-mono text-slate-500">
               <span>2027 (Rapid)</span>
-              <span>2030 (SBTi Standard)</span>
+              <span>2030 (Standard)</span>
               <span>2045 (Long-Term)</span>
             </div>
           </div>
@@ -209,11 +202,11 @@ export default function NetZeroSimulator() {
           {/* Slider 3: Blue Carbon vs Bioreactor Ratio */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-slate-300 font-semibold flex items-center gap-1.5">
-                <Trees className="w-4 h-4 text-emerald-400" />
-                Blue Carbon Allocation:
+              <span className="text-slate-300 font-medium flex items-center gap-1.5">
+                <Trees className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.75} />
+                Blue Carbon Ratio:
               </span>
-              <span className="text-emerald-400 font-bold text-sm">
+              <span className="text-emerald-400 font-semibold text-sm">
                 {Math.round(blueCarbonRatio * 100)}% <span className="text-xs font-normal text-slate-400">Mangrove</span>
               </span>
             </div>
@@ -227,9 +220,9 @@ export default function NetZeroSimulator() {
               className="w-full accent-emerald-400 cursor-pointer"
             />
             <div className="flex justify-between text-[10px] font-mono text-slate-500">
-              <span>10% Mangrove / 90% Algae</span>
+              <span>10% Mangrove</span>
               <span>{Math.round((1 - blueCarbonRatio) * 100)}% Algae PBR</span>
-              <span>90% Mangrove / 10% Algae</span>
+              <span>90% Mangrove</span>
             </div>
           </div>
         </div>
@@ -237,17 +230,17 @@ export default function NetZeroSimulator() {
 
       {/* Asset Requirements & Financial KPI Cards */}
       {p && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
           <div className="glass-card p-4 border-emerald-500/20">
             <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
               Microalgae PBRs
             </div>
-            <div className="text-2xl font-bold font-mono text-cyan-400">
+            <div className="text-xl font-semibold font-mono text-cyan-400">
               {p.assets_required.microalgae_bioreactors_count.toLocaleString()}{" "}
               <span className="text-xs font-normal text-slate-400">units</span>
             </div>
             <div className="text-[11px] font-mono text-slate-400 mt-1">
-              Cap: {p.assets_required.microalgae_annual_removal_tco2e.toLocaleString()} tCO2e/yr
+              Cap: {p.assets_required.microalgae_annual_removal_tco2e.toLocaleString()} t/yr
             </div>
           </div>
 
@@ -255,20 +248,20 @@ export default function NetZeroSimulator() {
             <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
               Mangrove Wetland
             </div>
-            <div className="text-2xl font-bold font-mono text-emerald-400">
+            <div className="text-xl font-semibold font-mono text-emerald-400">
               {p.assets_required.blue_carbon_mangrove_ha.toLocaleString()}{" "}
               <span className="text-xs font-normal text-slate-400">ha</span>
             </div>
             <div className="text-[11px] font-mono text-slate-400 mt-1">
-              Cap: {p.assets_required.blue_carbon_annual_removal_tco2e.toLocaleString()} tCO2e/yr
+              Cap: {p.assets_required.blue_carbon_annual_removal_tco2e.toLocaleString()} t/yr
             </div>
           </div>
 
           <div className="glass-card p-4 border-emerald-500/20">
             <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
-              Total CapEx Investment
+              CapEx Investment
             </div>
-            <div className="text-2xl font-bold font-mono text-amber-300">
+            <div className="text-xl font-semibold font-mono text-amber-300">
               ${(p.financial_estimation_usd.total_capex_usd / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })}k
             </div>
             <div className="text-[11px] font-mono text-slate-400 mt-1">
@@ -278,13 +271,13 @@ export default function NetZeroSimulator() {
 
           <div className="glass-card p-4 border-emerald-500/20">
             <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
-              SBTi Direct Reduction
+              Direct Reduction
             </div>
-            <div className="text-2xl font-bold font-mono text-emerald-400">
+            <div className="text-xl font-semibold font-mono text-emerald-400">
               {p.direct_reduction_pct_achieved}%
             </div>
             <div className="text-[11px] font-mono text-slate-400 mt-1">
-              Residual Removal: {p.target_removal_needed_tco2e.toLocaleString()} t/yr
+              Residual: {p.target_removal_needed_tco2e.toLocaleString()} t/yr
             </div>
           </div>
         </div>
@@ -292,61 +285,58 @@ export default function NetZeroSimulator() {
 
       {/* Trajectory Visual Chart */}
       {p && p.timeline_trajectory && (
-        <div className="glass-card p-6 border-emerald-500/20 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="glass-card p-5 border-emerald-500/20 space-y-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <TrendingDown className="w-4 h-4 text-emerald-400" />
-              <h3 className="text-sm font-bold tracking-tight text-white uppercase font-mono">
-                Decarbonization Trajectory Curve (2026 $\to$ {p.target_year})
+              <TrendingDown className="w-4 h-4 text-emerald-400" strokeWidth={1.75} />
+              <h3 className="text-sm font-semibold tracking-tight text-white">
+                Decarbonization Trajectory (2026 &rarr; {p.target_year})
               </h3>
             </div>
             <div className="flex items-center gap-3 text-xs font-mono text-slate-400">
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm bg-red-500/80" />
+                <span className="w-2 h-2 rounded-[2px] bg-red-400" />
                 <span>Gross Emissions</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
-                <span>Engineered Carbon Removal</span>
+                <span className="w-2 h-2 rounded-[2px] bg-emerald-400" />
+                <span>Engineered Removal</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm bg-cyan-400" />
+                <span className="w-2 h-2 rounded-[2px] bg-cyan-400" />
                 <span>Net Balance</span>
               </span>
             </div>
           </div>
 
-          {/* Animated Bar / Visual Trajectory */}
+          {/* Visual Trajectory */}
           <div className="space-y-3 pt-2">
             {p.timeline_trajectory.map((step) => {
               const maxVal = p.annual_gross_emissions_tco2e;
               const grossPct = Math.round((step.gross_emissions_tco2e / maxVal) * 100);
               const removalPct = Math.round((step.carbon_removal_tco2e / maxVal) * 100);
-              const netPct = Math.round((step.net_emissions_tco2e / maxVal) * 100);
 
               return (
                 <div key={step.year} className="space-y-1">
                   <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="font-bold text-white w-14">{step.year}</span>
+                    <span className="font-semibold text-white w-14">{step.year}</span>
                     <div className="flex items-center gap-3 text-[11px] text-slate-400">
                       <span className="text-red-400">Gross: {step.gross_emissions_tco2e.toLocaleString()} t</span>
                       <span className="text-emerald-400">Removal: {step.carbon_removal_tco2e.toLocaleString()} t</span>
-                      <span className="text-cyan-300 font-bold">Net: {step.net_emissions_tco2e.toLocaleString()} t</span>
+                      <span className="text-cyan-300 font-medium">Net: {step.net_emissions_tco2e.toLocaleString()} t</span>
                     </div>
-                    <span className="font-bold text-emerald-400 w-12 text-right">{step.pct_to_netzero}%</span>
+                    <span className="font-semibold text-emerald-400 w-12 text-right">{step.pct_to_netzero}%</span>
                   </div>
 
                   {/* Dual Bar Comparison */}
-                  <div className="h-3 w-full bg-slate-900 rounded-full overflow-hidden flex relative">
-                    {/* Gross Emissions Bar */}
+                  <div className="h-2.5 w-full bg-slate-900 rounded-full overflow-hidden flex relative">
                     <div
                       style={{ width: `${grossPct}%` }}
-                      className="h-full bg-red-500/60 transition-all duration-500"
+                      className="h-full bg-red-500/60 transition-all duration-300"
                     />
-                    {/* Removal Overlap Indicator */}
                     <div
                       style={{ width: `${Math.min(removalPct, 100)}%` }}
-                      className="h-full bg-emerald-500 absolute top-0 left-0 opacity-75 transition-all duration-500"
+                      className="h-full bg-emerald-500 absolute top-0 left-0 opacity-80 transition-all duration-300"
                     />
                   </div>
                 </div>
@@ -359,27 +349,27 @@ export default function NetZeroSimulator() {
             <table className="w-full text-left text-xs font-mono">
               <thead>
                 <tr className="text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 pb-2">
-                  <th className="py-2">Milestone Year</th>
-                  <th className="py-2">Gross Scope 1-3</th>
-                  <th className="py-2">Carbon Removal</th>
-                  <th className="py-2">Net Corporate Balance</th>
-                  <th className="py-2 text-right">Net-Zero Alignment</th>
+                  <th className="py-2 px-2">Milestone Year</th>
+                  <th className="py-2 px-2 text-right">Gross Emissions</th>
+                  <th className="py-2 px-2 text-right">Carbon Removal</th>
+                  <th className="py-2 px-2 text-right">Net Balance</th>
+                  <th className="py-2 px-2 text-right">Alignment</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {p.timeline_trajectory.map((r) => (
-                  <tr key={r.year} className="hover:bg-slate-900/50">
-                    <td className="py-2 font-bold text-white">{r.year}</td>
-                    <td className="py-2 text-red-400">{r.gross_emissions_tco2e.toLocaleString()} tCO2e</td>
-                    <td className="py-2 text-emerald-400">{r.carbon_removal_tco2e.toLocaleString()} tCO2e</td>
-                    <td className="py-2 font-bold text-cyan-300">{r.net_emissions_tco2e.toLocaleString()} tCO2e</td>
-                    <td className="py-2 text-right">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                  <tr key={r.year} className="hover:bg-slate-900/40">
+                    <td className="py-2 px-2 font-semibold text-white">{r.year}</td>
+                    <td className="py-2 px-2 text-right text-red-400">{r.gross_emissions_tco2e.toLocaleString()} t</td>
+                    <td className="py-2 px-2 text-right text-emerald-400">{r.carbon_removal_tco2e.toLocaleString()} t</td>
+                    <td className="py-2 px-2 text-right font-medium text-cyan-300">{r.net_emissions_tco2e.toLocaleString()} t</td>
+                    <td className="py-2 px-2 text-right">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
                         r.pct_to_netzero === 100
                           ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
                           : "bg-slate-800 text-slate-300"
                       }`}>
-                        {r.pct_to_netzero}% Target Achieved
+                        {r.pct_to_netzero}% Target
                       </span>
                     </td>
                   </tr>

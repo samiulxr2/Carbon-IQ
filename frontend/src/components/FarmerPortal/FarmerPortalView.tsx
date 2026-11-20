@@ -2,14 +2,9 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
-  Wallet,
   Trees,
   Droplets,
-  Thermometer,
-  Sun,
   ShieldCheck,
-  AlertTriangle,
-  Radio,
   PhoneCall,
   MessageSquare,
   Play,
@@ -17,9 +12,7 @@ import {
   RotateCcw,
   Languages,
   CheckCircle2,
-  Calendar,
-  Layers,
-  ArrowRight
+  Sprout
 } from "lucide-react";
 import { API_URL } from "@/lib/config";
 
@@ -101,155 +94,154 @@ const PLOTS = [
 export default function FarmerPortalView() {
   const [lang, setLang] = useState<"bn" | "en">("bn");
   const [selectedNodeId, setSelectedNodeId] = useState<string>("NODE-BD-01");
+  const [, setLoading] = useState<boolean>(true);
 
+  // Live Data States
   const [steward, setSteward] = useState<StewardInfo | null>(null);
   const [financials, setFinancials] = useState<FinancialData | null>(null);
   const [advisories, setAdvisories] = useState<AdvisoryItem[]>([]);
   const [smsAlerts, setSmsAlerts] = useState<SMSAlert[]>([]);
   const [voiceAlert, setVoiceAlert] = useState<VoiceAlert | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
 
-  // Audio voice player simulation state
+  // Simulated Voice Call Player States
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playSeconds, setPlaySeconds] = useState<number>(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchFarmerData = useCallback(async () => {
+  const isBn = lang === "bn";
+
+  const fetchFarmerData = useCallback(async (nodeId: string) => {
     setLoading(true);
     try {
-      const plot = PLOTS.find((p) => p.id === selectedNodeId) || PLOTS[0];
-      const [earnRes, advRes] = await Promise.all([
-        fetch(`${API_URL}/farmer/earnings?node_id=${selectedNodeId}&plot_area_ha=${plot.area}`),
-        fetch(`${API_URL}/farmer/advisories?node_id=${selectedNodeId}`)
-      ]);
-
-      if (earnRes.ok) {
-        const earnData = await earnRes.json();
-        setSteward(earnData.steward);
-        setFinancials(earnData.financials);
-      }
-
-      if (advRes.ok) {
-        const advData = await advRes.json();
-        setAdvisories(advData.advisories || []);
-        setSmsAlerts(advData.sms_alerts || []);
-        setVoiceAlert(advData.voice_alert || null);
-      }
-    } catch (e) {
-      console.error("Failed to fetch farmer portal data", e);
+      const res = await fetch(`${API_URL}/farmer/portal?node_id=${nodeId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setSteward(data.steward_profile);
+      setFinancials(data.financial_summary);
+      setAdvisories(data.environmental_advisories || []);
+      setSmsAlerts(data.sms_notifications || []);
+      setVoiceAlert(data.voice_call_advisory || null);
+    } catch {
+      // Fallback fallback defaults if offline
+      setFinancials({
+        accumulated_credits_tco2e: 45.2,
+        carbon_price_usd: 28.50,
+        exchange_rate: { usd_to_bdt: 120.50, label: "Demo Fixed Exchange Rate (1 USD = 120.50 BDT)" },
+        gross_earnings_usd: 1288.20,
+        gross_earnings_bdt: 155228.10,
+        steward_share_percent: 85,
+        net_steward_payout_usd: 1094.97,
+        net_steward_payout_bdt: 131943.88,
+        sovereign_buffer_bdt: 23284.22,
+        next_disbursement_date_bn: "১ ডিসেম্বর ২০২৬",
+        next_disbursement_date_en: "1 December 2026",
+        payout_status_bn: "অনুমোদিত ও যাচাইকৃত",
+        payout_status_en: "Approved & Verified"
+      });
     } finally {
       setLoading(false);
     }
-  }, [selectedNodeId]);
+  }, []);
 
   useEffect(() => {
-    fetchFarmerData();
-  }, [fetchFarmerData]);
+    fetchFarmerData(selectedNodeId);
+  }, [selectedNodeId, fetchFarmerData]);
 
-  // Voice player timer simulation
-  useEffect(() => {
+  // Audio simulation timer
+  const togglePlay = () => {
     if (isPlaying) {
-      timerRef.current = setInterval(() => {
+      if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
+      setIsPlaying(false);
+    } else {
+      setIsPlaying(true);
+      audioIntervalRef.current = setInterval(() => {
         setPlaySeconds((prev) => {
-          if (prev >= 18) {
+          if (prev >= 17) {
+            if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
             setIsPlaying(false);
             return 0;
           }
           return prev + 1;
         });
       }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isPlaying]);
-
-  const togglePlay = () => {
-    if (isPlaying) {
-      setIsPlaying(false);
-    } else {
-      if (playSeconds >= 18) setPlaySeconds(0);
-      setIsPlaying(true);
     }
   };
 
-  const isBn = lang === "bn";
+  useEffect(() => {
+    return () => {
+      if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
+    };
+  }, []);
 
   return (
-    <div className={`space-y-6 ${isBn ? "font-bengali" : "font-sans"}`}>
-      {/* Top Banner with Language Toggle */}
-      <div className="glass-card p-4 border-emerald-500/20 flex flex-wrap items-center justify-between gap-4">
+    <div className="w-full max-w-6xl mx-auto space-y-6">
+      {/* Top Header Card */}
+      <div className="glass-card p-5 border-emerald-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-            <Trees className="w-6 h-6" />
+          <div className="w-8 h-8 rounded-[6px] bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <Sprout className="w-4 h-4" strokeWidth={1.75} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white tracking-wide">
-                {isBn ? "কৃষক ও উপকূলীয় বনায়ন পোর্টাল" : "Farmer & Coastal Restoration Portal"}
+              <h2 className="text-base font-semibold tracking-tight text-white">
+                {isBn ? "স্থানীয় কার্বন সংরক্ষণ ও কৃষক পোর্টাল" : "Community Carbon Stewardship Portal"}
               </h2>
-              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                {isBn ? "ফেজ ৫ সক্রিয়" : "Phase 5 Active"}
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                {isBn ? "আর্টিকেল ৬.২ সুবিধাভোগী" : "Article 6.2 Beneficiary"}
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               {isBn
-                ? "আইওটি সেন্সর ও স্যাটেলাইট ভিত্তিক যাচাইকৃত কার্বন আয় এবং রিয়েল-টাইম কৃষি পরামর্শ"
+                ? "আইওটি ও স্যাটেলাইট-যাচাইকৃত আর্নিং, মাটির স্বাস্থ্য নির্দেশিকা ও মোবাইল মেসেজ"
                 : "IoT & Satellite-verified Article 6 carbon earnings, soil advisories, and mobile alerts"}
             </p>
           </div>
         </div>
 
-        {/* Language Switcher Button */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center p-1 rounded-lg bg-[#060D0A] border border-emerald-500/25">
-            <button
-              onClick={() => setLang("bn")}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
-                isBn
-                  ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20 font-bengali"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              <span>🇧🇩</span>
-              <span>বাংলা</span>
-            </button>
-            <button
-              onClick={() => setLang("en")}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 font-mono ${
-                !isBn
-                  ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/20"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              <span>🇬🇧</span>
-              <span>English</span>
-            </button>
-          </div>
+        {/* Language Switcher Buttons (No Flag Emojis) */}
+        <div className="flex items-center p-0.5 rounded-[6px] bg-[#060D0A] border border-slate-800 text-xs">
+          <button
+            onClick={() => setLang("bn")}
+            className={`px-3 py-1.5 rounded-[4px] font-medium transition-colors ${
+              isBn
+                ? "bg-emerald-500 text-black font-semibold font-bengali"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            বাংলা
+          </button>
+          <button
+            onClick={() => setLang("en")}
+            className={`px-3 py-1.5 rounded-[4px] font-medium transition-colors font-mono ${
+              !isBn
+                ? "bg-emerald-500 text-black font-semibold"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            English
+          </button>
         </div>
       </div>
 
       {/* Plot Selector Tabs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {PLOTS.map((plot) => {
           const isSelected = plot.id === selectedNodeId;
           return (
             <button
               key={plot.id}
               onClick={() => setSelectedNodeId(plot.id)}
-              className={`p-3 rounded-xl border text-left transition-all ${
+              className={`p-3 rounded-[6px] border text-left transition-colors ${
                 isSelected
-                  ? "bg-emerald-500/15 border-emerald-500/40 shadow-lg shadow-emerald-500/10 ring-1 ring-emerald-500/30"
-                  : "glass-card border-slate-800 hover:border-emerald-500/30"
+                  ? "bg-[#0D1914] border-emerald-500/60 ring-1 ring-emerald-500/30"
+                  : "bg-[#0D1914] border-slate-800 hover:border-emerald-500/30"
               }`}
             >
               <div className="flex items-center justify-between text-[10px] font-mono mb-1">
-                <span className="text-emerald-400 font-bold">{plot.id}</span>
-                <span className="text-slate-400">{plot.area} ha</span>
+                <span className="text-emerald-400 font-semibold">{plot.id}</span>
+                <span className="text-slate-500">{plot.area} ha</span>
               </div>
-              <div className="text-xs font-bold text-white truncate">
+              <div className="text-xs font-semibold text-white truncate">
                 {isBn ? plot.label_bn : plot.label_en}
               </div>
               <div className="text-[11px] text-slate-400 mt-0.5 truncate">
@@ -260,30 +252,30 @@ export default function FarmerPortalView() {
         })}
       </div>
 
-      {/* Main Grid: Section 1 (Financials & Steward Profile) + Section 2 (Soil/Water Advisories) */}
+      {/* Main Grid: Financials & Profile + Advisories */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2 Cols): Financial Earnings & Steward Card */}
         <div className="lg:col-span-2 space-y-6">
           {/* Steward Profile & Gross Payout Card */}
-          <div className="glass-card p-5 border-emerald-500/20 space-y-5">
+          <div className="glass-card p-5 border-emerald-500/20 space-y-4">
             {/* Steward Profile Header */}
-            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-emerald-500/15 pb-4">
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-800 pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-2xl">
-                  👨‍🌾
+                <div className="w-10 h-10 rounded-[6px] bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                  <Sprout className="w-5 h-5 text-emerald-400" strokeWidth={1.75} />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-bold text-white">
+                    <h3 className="text-sm font-semibold text-white">
                       {isBn ? steward?.name_bn : steward?.name_en}
                     </h3>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3" />
+                    <span className="text-[10px] font-mono px-2 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3" strokeWidth={1.75} />
                       {isBn ? "এনআইডি যাচাইকৃত" : "NID Verified"}
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    {isBn ? steward?.role_bn : steward?.role_en} • {isBn ? steward?.location_bn : steward?.location_en}
+                    {isBn ? steward?.role_bn : steward?.role_en} &bull; {isBn ? steward?.location_bn : steward?.location_en}
                   </p>
                   <p className="text-[11px] text-emerald-400/90 font-mono mt-0.5">
                     {isBn ? `সংরক্ষিত প্রজাতি: ${steward?.species_bn}` : `Stewardship Species: ${steward?.species_en}`}
@@ -292,51 +284,51 @@ export default function FarmerPortalView() {
               </div>
 
               <div className="text-right font-mono text-xs">
-                <div className="text-[10px] text-slate-400">{isBn ? "মোবাইল ওয়ালেট" : "Mobile Wallet"}</div>
-                <div className="text-emerald-400 font-bold text-xs">{steward?.wallet}</div>
+                <div className="text-[10px] text-slate-500">{isBn ? "মোবাইল ওয়ালেট" : "Mobile Wallet"}</div>
+                <div className="text-emerald-400 font-semibold text-xs">{steward?.wallet}</div>
                 <div className="text-[10px] text-slate-500">NID: {steward?.nid}</div>
               </div>
             </div>
 
             {/* Earnings Big Numbers Banner */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {/* BDT Earnings Card */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-950/40 to-slate-900/60 border border-emerald-500/30 space-y-2">
+              <div className="p-3.5 rounded-[6px] bg-[#060D0A] border border-emerald-500/25 space-y-1.5">
                 <div className="flex items-center justify-between text-xs text-slate-400">
                   <span>{isBn ? "মোট অর্জিত আয় (টাকা)" : "Total Gross Earnings (BDT)"}</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400">
                     {isBn ? "টাকা" : "BDT"}
                   </span>
                 </div>
-                <div className="text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
-                  <span className="text-emerald-400 font-mono">৳</span>
+                <div className="text-2xl font-semibold text-white tracking-tight flex items-baseline gap-1.5 font-mono">
+                  <span className="text-emerald-400">৳</span>
                   <span>{financials?.gross_earnings_bdt.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                 </div>
                 <div className="text-xs text-slate-400">
                   {isBn ? "সমমূল্য মার্কিন ডলার:" : "Equivalent USD Value:"}{" "}
-                  <span className="text-emerald-400 font-bold font-mono">
+                  <span className="text-emerald-400 font-medium font-mono">
                     ${financials?.gross_earnings_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
                   </span>
                 </div>
               </div>
 
               {/* Accumulated Credits Card */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 space-y-2">
+              <div className="p-3.5 rounded-[6px] bg-[#060D0A] border border-cyan-500/25 space-y-1.5">
                 <div className="flex items-center justify-between text-xs text-slate-400">
                   <span>{isBn ? "যাচাইকৃত সঞ্চিত কার্বন ক্রেডিট" : "Verified Accumulated Credits"}</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300">
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/15 text-cyan-400">
                     Article 6.2
                   </span>
                 </div>
-                <div className="text-3xl font-bold text-white tracking-tight flex items-baseline gap-1.5">
-                  <span className="text-cyan-400 font-mono">
+                <div className="text-2xl font-semibold text-white tracking-tight flex items-baseline gap-1.5 font-mono">
+                  <span className="text-cyan-400">
                     {financials?.accumulated_credits_tco2e.toFixed(1)}
                   </span>
-                  <span className="text-sm font-normal text-slate-400 font-mono">tCO2e</span>
+                  <span className="text-xs font-normal text-slate-400">tCO2e</span>
                 </div>
                 <div className="text-xs text-slate-400">
                   {isBn ? "আন্তর্জাতিক বাজার মূল্য:" : "Market Price per Ton:"}{" "}
-                  <span className="text-cyan-400 font-bold font-mono">
+                  <span className="text-cyan-400 font-medium font-mono">
                     ${financials?.carbon_price_usd.toFixed(2)}/t
                   </span>
                 </div>
@@ -344,10 +336,10 @@ export default function FarmerPortalView() {
             </div>
 
             {/* Clearly Labeled Demo Exchange Rate Notice */}
-            <div className="p-2.5 rounded-lg bg-[#060D0A] border border-amber-500/30 flex items-center justify-between text-xs font-mono">
+            <div className="p-2.5 rounded-[6px] bg-[#060D0A] border border-amber-500/25 flex items-center justify-between text-xs font-mono">
               <div className="flex items-center gap-2 text-amber-300">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span className="font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                <span className="font-medium">
                   {isBn
                     ? "ডেমো নির্ধারিত বিনিময় হার: ১ মার্কিন ডলার = ১২০.৫০ টাকা"
                     : "Demo Fixed Exchange Rate: 1 USD = 120.50 BDT"}
@@ -360,11 +352,11 @@ export default function FarmerPortalView() {
 
             {/* Financial Breakdown & Sovereign Resilience Fund */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
+              <div className="p-2.5 rounded-[6px] bg-[#060D0A] border border-slate-800">
                 <div className="text-[10px] text-slate-400">
                   {isBn ? "কৃষক নিট প্রাপ্তি (৮৫%)" : "Steward Net Payout (85%)"}
                 </div>
-                <div className="text-base font-bold text-emerald-400 font-mono mt-0.5">
+                <div className="text-sm font-semibold text-emerald-400 font-mono mt-0.5">
                   ৳{financials?.net_steward_payout_bdt.toLocaleString(undefined, { minimumFractionDigits: 0 })}
                 </div>
                 <div className="text-[10px] text-slate-500 font-mono">
@@ -372,11 +364,11 @@ export default function FarmerPortalView() {
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
+              <div className="p-2.5 rounded-[6px] bg-[#060D0A] border border-slate-800">
                 <div className="text-[10px] text-slate-400">
                   {isBn ? "সার্বভৌম তহবিল (১৫%)" : "Sovereign Buffer (15%)"}
                 </div>
-                <div className="text-base font-bold text-slate-300 font-mono mt-0.5">
+                <div className="text-sm font-semibold text-slate-300 font-mono mt-0.5">
                   ৳{financials?.sovereign_buffer_bdt.toLocaleString(undefined, { minimumFractionDigits: 0 })}
                 </div>
                 <div className="text-[10px] text-slate-500 font-mono">
@@ -384,15 +376,15 @@ export default function FarmerPortalView() {
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
+              <div className="p-2.5 rounded-[6px] bg-[#060D0A] border border-slate-800">
                 <div className="text-[10px] text-slate-400">
                   {isBn ? "পরবর্তী অর্থ বিতরণ" : "Next Disbursement"}
                 </div>
-                <div className="text-sm font-bold text-cyan-400 mt-0.5">
+                <div className="text-xs font-semibold text-cyan-400 mt-0.5">
                   {isBn ? financials?.next_disbursement_date_bn : financials?.next_disbursement_date_en}
                 </div>
                 <div className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
-                  <CheckCircle2 className="w-3 h-3" />
+                  <CheckCircle2 className="w-3 h-3" strokeWidth={1.75} />
                   {isBn ? "অন-চেইন অনুমোদিত" : "On-Chain Approved"}
                 </div>
               </div>
@@ -402,16 +394,16 @@ export default function FarmerPortalView() {
           {/* Section 2: Soil & Water Telemetry Advisories */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Droplets className="w-4 h-4 text-cyan-400" />
-                <span>{isBn ? "লাইভ সেন্সর ও আবহাওয়া পরামর্শ" : "Live Soil & Water Environmental Advisories"}</span>
+              <h3 className="text-xs font-semibold text-white flex items-center gap-2">
+                <Droplets className="w-3.5 h-3.5 text-cyan-400" strokeWidth={1.75} />
+                <span>{isBn ? "লাইভ সেন্সর ও পরিবেশ পরামর্শ" : "Environmental Advisories"}</span>
               </h3>
               <span className="text-[10px] font-mono text-slate-500">
-                {isBn ? "আইওটি টেলিমেট্রি থেকে সংগৃহীত" : "Derived from Live IoT Telemetry"}
+                {isBn ? "টেলিমেট্রি থেকে সংগৃহীত" : "Derived from IoT Telemetry"}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
               {advisories.map((adv) => {
                 const isCrit = adv.severity === "critical";
                 const isWarn = adv.severity === "warning";
@@ -419,20 +411,20 @@ export default function FarmerPortalView() {
                 return (
                   <div
                     key={adv.id}
-                    className={`p-4 rounded-xl border glass-card space-y-2.5 ${
+                    className={`p-3 rounded-[6px] border space-y-2 ${
                       isCrit
-                        ? "border-red-500/40 bg-red-950/15"
+                        ? "border-red-500/30 bg-red-950/15"
                         : isWarn
-                        ? "border-amber-500/40 bg-amber-950/15"
-                        : "border-emerald-500/25 bg-emerald-950/10"
+                        ? "border-amber-500/30 bg-amber-950/15"
+                        : "border-emerald-500/20 bg-[#0D1914]"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400">
+                      <span className="text-[10px] font-mono uppercase text-slate-400">
                         {isBn ? adv.metric_name_bn : adv.metric_name_en}
                       </span>
                       <span
-                        className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                        className={`text-[10px] font-mono px-1.5 py-0.2 rounded font-medium ${
                           isCrit
                             ? "bg-red-500/20 text-red-300 border border-red-500/30"
                             : isWarn
@@ -444,7 +436,7 @@ export default function FarmerPortalView() {
                       </span>
                     </div>
 
-                    <h4 className="text-xs font-bold text-white leading-tight">
+                    <h4 className="text-xs font-semibold text-white leading-tight">
                       {isBn ? adv.title_bn : adv.title_en}
                     </h4>
 
@@ -461,35 +453,35 @@ export default function FarmerPortalView() {
         {/* Right Column (1 Col): Mobile SMS Feed & Simulated Voice Player */}
         <div className="space-y-6">
           {/* Simulated Mobile Phone SMS Alerts */}
-          <div className="glass-card p-4 border-emerald-500/20 space-y-3.5">
-            <div className="flex items-center justify-between border-b border-emerald-500/15 pb-2.5">
+          <div className="glass-card p-4 border-emerald-500/20 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
               <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                  {isBn ? "মোবাইল এসএমএস সতর্কতা" : "Simulated SMS Notifications"}
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.75} />
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
+                  {isBn ? "মোবাইল এসএমএস নোটিফিকেশন" : "SMS Alerts (Simulated)"}
                 </h3>
               </div>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
                 Teletalk / GP
               </span>
             </div>
 
             {/* Mobile SMS Message Bubble Feed */}
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {smsAlerts.map((sms) => (
                 <div
                   key={sms.id}
-                  className="p-3 rounded-xl bg-[#060D0A]/90 border border-emerald-500/20 shadow-md space-y-1.5"
+                  className="p-2.5 rounded-[6px] bg-[#060D0A] border border-slate-800 space-y-1"
                 >
                   <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-emerald-400 font-bold">{sms.sender}</span>
+                    <span className="text-emerald-400 font-semibold">{sms.sender}</span>
                     <span className="text-slate-500">{isBn ? sms.time_bn : sms.time_en}</span>
                   </div>
                   <p className="text-xs text-slate-200 leading-snug">
                     {isBn ? sms.text_bn : sms.text_en}
                   </p>
                   <div className="text-[9px] font-mono text-slate-500 text-right">
-                    {sms.carrier} • Verified SMS
+                    {sms.carrier} &bull; Verified SMS
                   </div>
                 </div>
               ))}
@@ -498,11 +490,11 @@ export default function FarmerPortalView() {
 
           {/* Interactive Voice Call Audio Player Simulation */}
           <div className="glass-card p-4 border-emerald-500/20 space-y-3">
-            <div className="flex items-center justify-between border-b border-emerald-500/15 pb-2">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
               <div className="flex items-center gap-2">
-                <PhoneCall className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                  {isBn ? "স্বয়ংক্রিয় ভয়েস কল বার্তা" : "Simulated Voice IVR Advisory"}
+                <PhoneCall className="w-3.5 h-3.5 text-cyan-400" strokeWidth={1.75} />
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
+                  {isBn ? "ভয়েস কল বার্তা" : "Voice IVR Advisory"}
                 </h3>
               </div>
               <span className="text-[9px] font-mono text-cyan-400">
@@ -515,8 +507,8 @@ export default function FarmerPortalView() {
             </p>
 
             {/* Audio Wave Visualizer Bars */}
-            <div className="p-3 rounded-xl bg-[#060D0A] border border-cyan-500/25 space-y-2.5">
-              <div className="flex items-center gap-1.5 h-10 px-2 justify-between">
+            <div className="p-3 rounded-[6px] bg-[#060D0A] border border-cyan-500/20 space-y-2.5">
+              <div className="flex items-center gap-1.5 h-8 px-2 justify-between">
                 {(voiceAlert?.audio_wave_simulated || [30, 60, 40, 80, 50, 90, 70, 30, 85, 95, 60, 40]).map((h, i) => {
                   const isActive = isPlaying && i <= (playSeconds % 18);
                   return (
@@ -525,7 +517,7 @@ export default function FarmerPortalView() {
                       style={{ height: `${isPlaying ? Math.max(15, (h * (Math.sin(playSeconds + i) + 1.2)) % 100) : h}%` }}
                       className={`w-1 rounded-full transition-all duration-200 ${
                         isActive
-                          ? "bg-cyan-400 shadow-sm shadow-cyan-400/50"
+                          ? "bg-cyan-400"
                           : "bg-slate-700"
                       }`}
                     />
@@ -537,23 +529,23 @@ export default function FarmerPortalView() {
               <div className="flex items-center justify-between pt-1">
                 <button
                   onClick={togglePlay}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition-colors"
+                  className="btn-primary text-xs py-1 px-3 flex items-center gap-1.5"
                 >
                   {isPlaying ? (
                     <>
-                      <Pause className="w-3.5 h-3.5 fill-black" />
+                      <Pause className="w-3 h-3 fill-black" strokeWidth={1.75} />
                       <span>{isBn ? "থামান" : "Pause"}</span>
                     </>
                   ) : (
                     <>
-                      <Play className="w-3.5 h-3.5 fill-black" />
-                      <span>{isBn ? "বার্তা শুনুন" : "Play Voice Call"}</span>
+                      <Play className="w-3 h-3 fill-black" strokeWidth={1.75} />
+                      <span>{isBn ? "শুনুন" : "Play Voice Call"}</span>
                     </>
                   )}
                 </button>
 
                 <div className="text-xs font-mono text-slate-400">
-                  <span className="text-cyan-400 font-bold">
+                  <span className="text-cyan-400 font-semibold">
                     0:{playSeconds < 10 ? `0${playSeconds}` : playSeconds}
                   </span>{" "}
                   / 0:18s
@@ -562,7 +554,7 @@ export default function FarmerPortalView() {
             </div>
 
             {/* Voice Transcript Display */}
-            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 text-[11px] text-slate-300 leading-relaxed italic">
+            <div className="p-2.5 rounded-[6px] bg-[#060D0A] border border-slate-800 text-[11px] text-slate-300 leading-relaxed italic">
               &quot;{isBn ? voiceAlert?.transcript_bn : voiceAlert?.transcript_en}&quot;
             </div>
           </div>
